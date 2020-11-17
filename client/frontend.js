@@ -11,11 +11,43 @@ new Vue({
             contacts: []
         }
     },
+    computed: {
+        canCreate() {
+            return this.form.value.trim() && this.form.name.trim()
+        }
+    },
     methods: {
         createContact() {
             const {...contact} = this.form
-            this.contacts.push({...contact, id: Date.now()})
+            this.contacts.push({...contact, id: Date.now(), marked: false})
             this.form.value = this.form.name = ''
+        },
+        markContact(id) {
+            const contact = this.contacts.find(c => c.id === id)
+            contact.marked = true
+        },
+        removeContact(id) {
+            this.contacts = this.contacts.filter(c => c.id !== id)
         }
     }
 })
+
+async function request(url, method = 'GET', data = null) {
+    try {
+        const headers = {}
+        let body;
+
+        if (data) {
+            headers['Content-Type'] = 'application/json'
+            body = JSON.stringify(data)
+        }
+        const response = await fetch(url, {
+            method,
+            headers,
+            body
+        })
+        return response.json()
+    } catch (e) {
+        console.warn('Error', e.message)
+    }
+}
